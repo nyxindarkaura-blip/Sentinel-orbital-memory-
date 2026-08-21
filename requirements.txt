@@ -1,0 +1,5 @@
+# This MVP intentionally uses only Python's standard library (json, os, statistics)
+# so it runs anywhere with no install step. Nothing to install for the core pipeline.
+#
+# If you extend this with a UI (recommended next step), add e.g.:
+# streamlit
