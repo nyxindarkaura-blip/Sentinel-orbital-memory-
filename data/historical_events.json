@@ -1,0 +1,65 @@
+[
+  {
+    "id": "MGS-2006",
+    "mission": "Mars Global Surveyor (MGS)",
+    "agency": "NASA / JPL",
+    "date": "2006-11-02",
+    "subsystem": "Electrical Power System (battery / solar array)",
+    "summary": "A parameter uploaded to the wrong onboard computer memory address in June 2006 went undetected for five months. On November 2, 2006, a routine solar-panel adjustment command triggered this latent error. The spacecraft misjudged the panel had jammed, entered a safe/contingency mode, and reoriented in a way that left one of its two batteries in direct sunlight. The onboard software misread the resulting heat as a sign the battery was already charged and stopped charging it. Both batteries depleted within roughly 11 hours, leaving the spacecraft unable to control its orientation. Contact was never re-established.",
+    "telemetry_pattern": [
+      "Battery temperature rising outside nominal range",
+      "Voltage decline inconsistent with charge state",
+      "Reorientation/attitude change following a routine command",
+      "Loss of downlink shortly after the anomaly began"
+    ],
+    "root_cause": "A June 2006 software/parameter update wrote configuration data to the wrong memory address. This latent error was not triggered until a routine solar-panel command five months later, which then combined with a thermal-safety gap in the spacecraft's contingency-mode logic (it did not check whether the new orientation was thermally safe).",
+    "outcome": "Total loss of spacecraft. Mission ended after nearly 10 years in orbit (vs. a 2-year primary mission), following an 11-hour battery depletion sequence.",
+    "lesson": "A subtle, seemingly unrelated latent fault (a memory-address error) can lie dormant for months and only manifest when a routine, everyday command triggers it. Contingency/safe-mode logic must independently verify thermal safety, not just electrical or attitude status, before taking automated action.",
+    "source": [
+      "NASA JPL, 'Report Reveals Likely Causes of Mars Spacecraft Loss', April 13, 2007 (https://www.jpl.nasa.gov/news/report-reveals-likely-causes-of-mars-spacecraft-loss/)",
+      "ScienceDaily / NASA JPL, 'NASA's Mars Global Surveyor Loss: Battery Failure, Computer Error Blamed', April 2007"
+    ]
+  },
+  {
+    "id": "KEPLER-2013",
+    "mission": "Kepler Space Telescope",
+    "agency": "NASA / Ames Research Center",
+    "date": "2013-05-11",
+    "subsystem": "Attitude Control System (reaction wheels)",
+    "summary": "Kepler relied on four reaction wheels to hold its extremely precise pointing. One wheel (RWA2) failed abruptly in July 2012 with almost no warning. A second wheel (RWA4) began showing increased friction over time before failing critically in May 2013, which left Kepler with only two working wheels -- one short of the three needed for stable science-grade pointing. The spacecraft's original planet-hunting mission ended, though it was later repurposed (K2) using a modified pointing strategy.",
+    "telemetry_pattern": [
+      "Commanded torque values becoming noisier than baseline",
+      "Wheel speed departing from its usual/expected pattern",
+      "Gradual increase in friction trend prior to the second failure (unlike the first, sudden failure)",
+      "Spacecraft entering self-preserving safe mode"
+    ],
+    "root_cause": "Mechanical wear in the reaction wheel bearings/housing. The first wheel failed too fast to intervene operationally; the second showed a gradual, detectable friction increase in telemetry before critical failure.",
+    "outcome": "Loss of the spacecraft's original high-precision pointing capability and its primary science mission; mission was redesigned (K2) around the remaining two wheels and thrusters rather than a total loss.",
+    "lesson": "Not all failures give warning: one wheel failed almost instantly, but the second showed a gradual, telemetry-visible degradation trend (rising friction, noisier torque) before critical failure -- exactly the kind of slow drift an early-warning system should flag well before a safe-mode event.",
+    "source": [
+      "Astrobites / NASA Kepler Mission Manager Update, May 2013",
+      "AIAA, 'Reaction Wheel Performance Characterization Using the Kepler...' (arc.aiaa.org/doi/pdf/10.2514/6.2018-2563)",
+      "Scientific American, 'The Wheels Come Off Kepler Planet-Finding Mission', 2013"
+    ]
+  },
+  {
+    "id": "HUBBLE-2008",
+    "mission": "Hubble Space Telescope",
+    "agency": "NASA / Goddard Space Flight Center",
+    "date": "2008-09-27",
+    "subsystem": "Science Instrument Command and Data Handling (SI C&DH) unit",
+    "summary": "The primary side ('A' side) of Hubble's Science Instrument Command and Data Handling unit -- the system that commands science instruments and formats data for downlink -- suffered a permanent electronic failure on September 27, 2008. Ground controllers switched to the redundant 'B' side to restore operations, and NASA postponed the already-scheduled Servicing Mission 4 to give engineers time to build and install a full replacement unit, which flew in 2009.",
+    "telemetry_pattern": [
+      "Loss of science-instrument command/data formatting on the active side",
+      "Successful failover to the redundant (backup) side",
+      "No prior gradual warning signal reported -- an abrupt hardware failure"
+    ],
+    "root_cause": "Permanent electronic failure of the 'A' side of the SI C&DH unit; exact component-level cause was addressed by full replacement during servicing rather than in-orbit repair.",
+    "outcome": "Temporary loss of science-instrument operations, resolved by switching to the redundant side; the failed unit was fully replaced during the next servicing mission. No permanent loss of the observatory.",
+    "lesson": "Built-in hardware redundancy (an A/B side design) can fully absorb an abrupt, non-predictable electronic failure -- but the fix still required a hardware swap, showing that redundancy buys time and continuity, not a permanent solution.",
+    "source": [
+      "NASA/Goddard, 'Science Instrument Command and Data Handling Unit' mission asset page (science.nasa.gov)",
+      "NASA Facts, 'Hubble Space Telescope Servicing Mission 4: Science Instrument Command and Data Handling Module' (NASA PDF 327141main_SICDH_FS-2009-4-107)"
+    ]
+  }
+]
