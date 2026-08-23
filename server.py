@@ -24,7 +24,7 @@ from sentinel import run_sentinel
 from orbital_memory import find_similar_events
 from synthesis import build_risk_card
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='public', static_url_path='')
 
 @app.route('/')
 def index():
