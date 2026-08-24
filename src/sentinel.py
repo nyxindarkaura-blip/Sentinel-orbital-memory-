@@ -135,3 +135,69 @@ def forecast_trajectory(readings, lookback_minutes: int = 15):
         raise InvalidTelemetryError(
             f"lookback_minutes must be a positive integer, got {lookback_minutes!r}."
     )
+        _validate_readings(readings, minimum_length=lookback_minutes)
+
+    recent = readings[-lookback_minutes:]
+    first, last = recent[0], recent[-1]
+    elapsed = last["minute"] - first["minute"]
+    if elapsed == 0:
+        elapsed = 1
+
+    rates = {
+        "battery_voltage": (last["battery_voltage"] - first["battery_voltage"]) / elapsed,
+        "current": (last["current"] - first["current"]) / elapsed,
+        "temperature": (last["temperature"] - first["temperature"]) / elapsed,
+    }
+
+    def project(signal, minutes_ahead):
+        return round(last[signal] + rates[signal] * minutes_ahead, 2)
+
+    forecast = {}
+    for horizon in (30, 60):
+        forecast[horizon] = {
+            "battery_voltage": project("battery_voltage", horizon),
+            "current": project("current", horizon),
+            "temperature": project("temperature", horizon),
+        }
+
+    # Trend label used in the risk card
+    trend = "Worsening" if rates["temperature"] > 0 and rates["battery_voltage"] < 0 else "Stable"
+
+    return {
+        "rates_per_minute": rates,
+        "trend": trend,
+        "forecast": forecast,
+    }
+
+
+def run_sentinel(readings):
+    """ Runs the full SENTINEL pipeline: detect + diagnose + forecast. Raises InvalidTelemetryError if `readings` is malformed or too short for the forecasting step (needs at least 15 readings by default). """
+    diagnosis = detect_and_diagnose(readings)
+    projection = forecast_trajectory(readings)
+    return {
+        "diagnosis": diagnosis,
+        "forecast": projection,
+    }
+
+
+if __name__ == "__main__":
+    from telemetry_simulator import generate_demo_stream
+
+    stream = generate_demo_stream()
+
+    try:
+        result = run_sentinel(stream)
+    except InvalidTelemetryError as e:
+        print(f"SENTINEL could not process the telemetry stream: {e}")
+    else:
+        print("=== SENTINEL: Detection & Diagnosis ===")
+        print("Anomaly detected:", result["diagnosis"]["anomaly_detected"])
+        print("Severity:", result["diagnosis"]["severity"])
+        print("Confidence:", f"{result['diagnosis']['confidence']}%")
+        print("Flagged signals:", result["diagnosis"]["flagged_signals"])
+        print()
+        print("=== SENTINEL: Forecast ===")
+        print("Trend:", result["forecast"]["trend"])
+        print("Projected in 30 min:", result["forecast"]["forecast"][30])
+        print("Projected in 60 min:", result["forecast"]["forecast"][60])    
+        
