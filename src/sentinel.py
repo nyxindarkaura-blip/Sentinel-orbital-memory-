@@ -37,3 +37,101 @@ def _validate_readings(readings, minimum_length=1):
                 raise InvalidTelemetryError(
                     f"Reading at index {i} is missing required field '{field}'. "
                     f"Expected fields: {REQUIRED_FIELDS}."
+                     )
+
+            value = reading[field]
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                raise InvalidTelemetryError(
+                    f"Reading at index {i}, field '{field}' must be a number, "
+                    f"got {type(value).__name__} ({value!r})."
+                )
+            if isinstance(value, float) and (value != value):  # NaN check (NaN != NaN)
+                raise InvalidTelemetryError(
+                    f"Reading at index {i}, field '{field}' is NaN, which is not a valid telemetry value."
+                )
+
+
+def _baseline(readings):
+    """Compute the average of each signal over the first N readings (the 'normal' window)."""
+    window = readings[:NORMAL_BASELINE_MINUTES]
+    baseline = {
+        "battery_voltage": mean(r["battery_voltage"] for r in window),
+        "current": mean(r["current"] for r in window),
+        "temperature": mean(r["temperature"] for r in window),
+    }
+    for signal, value in baseline.items():
+        if value == 0:
+            raise InvalidTelemetryError(
+                f"Baseline for '{signal}' is 0, which would cause a divide-by-zero error "
+                f"when computing percent change. Check the input telemetry."
+            )
+    return baseline
+
+
+def _percent_change(baseline_value, current_value):
+    return round(((current_value - baseline_value) / baseline_value) * 100, 1)
+
+
+def detect_and_diagnose(readings, threshold_percent: float = 5.0):
+    """ DETECT + DIAGNOSE. Compares the most recent reading against the established baseline. If enough signals have drifted past `threshold_percent`, it's flagged as an anomaly, and we record which signals changed and by how much. Returns a dict describing the current state -- this is SENTINEL's "WHAT happened" and "WHY is it happening" answer. Raises InvalidTelemetryError if `readings` is malformed (see _validate_readings) or if `threshold_percent` is not a positive number. """
+    _validate_readings(readings, minimum_length=1)
+
+    if not isinstance(threshold_percent, (int, float)) or isinstance(threshold_percent, bool) or threshold_percent <= 0:
+        raise InvalidTelemetryError(
+            f"threshold_percent must be a positive number, got {threshold_percent!r}."
+            )
+            baseline = _baseline(readings)
+    latest = readings[-1]
+
+    changes = {
+        "battery_voltage": _percent_change(baseline["battery_voltage"], latest["battery_voltage"]),
+        "current": _percent_change(baseline["current"], latest["current"]),
+        "temperature": _percent_change(baseline["temperature"], latest["temperature"]),
+    }
+
+    # Which signals moved past the threshold, in an "unhealthy" direction?
+    # (voltage dropping is bad; current and temperature rising are bad)
+    flags = []
+    if changes["battery_voltage"] <= -threshold_percent:
+        flags.append(("battery_voltage", changes["battery_voltage"]))
+    if changes["current"] >= threshold_percent:
+        flags.append(("current", changes["current"]))
+    if changes["temperature"] >= threshold_percent:
+        flags.append(("temperature", changes["temperature"]))
+
+    anomaly_detected = len(flags) >= 2  # require at least 2 correlated signals, like the real MGS pattern
+
+    # Simple confidence score: more flagged signals + bigger deviations = higher confidence
+    magnitude = 0
+    if anomaly_detected:
+        magnitude = sum(abs(v) for _, v in flags)
+        confidence = min(95, round(50 + magnitude * 2))
+    else:
+        confidence = 0
+
+    severity = "Low"
+    if anomaly_detected:
+        if magnitude >= 25:
+            severity = "High"
+        elif magnitude >= 12:
+            severity = "Medium"
+        else:
+            severity = "Low"
+
+    return {
+        "baseline": baseline,
+        "latest_reading": latest,
+        "changes_percent": changes,
+        "flagged_signals": flags,
+        "anomaly_detected": anomaly_detected,
+        "severity": severity,
+        "confidence": confidence,
+    }
+
+
+def forecast_trajectory(readings, lookback_minutes: int = 15):
+    """ FORECAST. Looks at the trend over the last `lookback_minutes` of readings and linearly extrapolates: "if this rate of change continues, where will voltage/current/temperature be in 30 and 60 minutes?" This is intentionally a simple trend extrapolation, not a trained predictive model -- fully explainable, and honest about being simple, which is a strength for a prototype: it's fast to build, easy to trust, and easy to explain in a demo video. Raises InvalidTelemetryError if `readings` is malformed or shorter than `lookback_minutes`, or if `lookback_minutes` is not a positive integer. """
+    if not isinstance(lookback_minutes, int) or isinstance(lookback_minutes, bool) or lookback_minutes <= 0:
+        raise InvalidTelemetryError(
+            f"lookback_minutes must be a positive integer, got {lookback_minutes!r}."
+    )
