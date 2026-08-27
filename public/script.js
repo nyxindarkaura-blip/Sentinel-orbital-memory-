@@ -33,7 +33,16 @@ async function triggerSimulation(mode) {
 
         const response = await fetch(`/api/simulate?mode=${mode}`);
         if (!response.ok) {
-            throw new Error(`Server returned HTTP status ${response.status}`);
+            let errorMsg = `Server returned HTTP status ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMsg = errorData.error;
+                }
+            } catch (jsonErr) {
+                // Response was not JSON
+            }
+            throw new Error(errorMsg);
         }
         
         const data = await response.json();

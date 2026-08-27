@@ -22,6 +22,7 @@ if src_path not in sys.path:
 from telemetry_simulator import generate_demo_stream, generate_normal_telemetry
 from sentinel import run_sentinel
 from orbital_memory import find_similar_events
+from errors import PipelineError
 from synthesis import build_risk_card
 
 app = Flask(__name__, static_folder='public', static_url_path='')
@@ -36,24 +37,29 @@ def simulate():
     """Exposes the telemetry simulation and risk diagnosis pipeline as a JSON API."""
     mode = request.args.get('mode', 'anomaly')
     
-    if mode == 'nominal':
-        # Generate 60 minutes of normal telemetry (within baseline ranges)
-        readings = generate_normal_telemetry(minutes=60, start_minute=0)
-    else:
-        # Generate 30 minutes normal + 30 minutes anomalous telemetry
-        readings = generate_demo_stream()
+    try:
+        if mode == 'nominal':
+            # Generate 60 minutes of normal telemetry (within baseline ranges)
+            readings = generate_normal_telemetry(minutes=60, start_minute=0)
+        else:
+            # Generate 30 minutes normal + 30 minutes anomalous telemetry
+            readings = generate_demo_stream()
+            
+        sentinel_result = run_sentinel(readings)
+        diagnosis = sentinel_result["diagnosis"]
+        matches = find_similar_events(diagnosis["flagged_signals"])
+        card = build_risk_card(sentinel_result, matches)
         
-    sentinel_result = run_sentinel(readings)
-    diagnosis = sentinel_result["diagnosis"]
-    matches = find_similar_events(diagnosis["flagged_signals"])
-    card = build_risk_card(sentinel_result, matches)
-    
-    return jsonify({
-        "readings": readings,
-        "sentinel_result": sentinel_result,
-        "matches": matches,
-        "card": card
-    })
+        return jsonify({
+            "readings": readings,
+            "sentinel_result": sentinel_result,
+            "matches": matches,
+            "card": card
+        })
+    except PipelineError as e:
+        return jsonify({
+            "error": str(e)
+        }), 400
 
 if __name__ == '__main__':
     print("\n" + "="*70)

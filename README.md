@@ -64,7 +64,19 @@ LIVE TELEMETRY
 
 ## How IBM Bob Was Used
 
-*(To be completed by the team — document specifically which parts of this codebase were generated, refactored, or extended using IBM Bob, e.g. "Bob generated the initial anomaly detection scaffolding," "Bob was used to debug the retrieval scoring logic," etc. Judges will check this section, so be specific and honest.)*
+IBM Bob was utilized as the primary AI engineering assistant to generate, refactor, and connect both the backend analysis engine and the visual dashboard interface:
+
+1. **Core Logic & Scaffolding (Backend)**:
+   - Generated the initial statistical anomaly detection algorithms, rolling baseline computations, and forecasting math models inside `src/sentinel.py`.
+   - Assisted in writing the keyword-overlap scoring and relevance formulas for historical database matching in `src/orbital_memory.py`.
+   - Structured the synthesis reporting logic in `src/synthesis.py` to compile metrics and precedents into a unified risk card format.
+2. **Visual Frontend Cockpit**:
+   - Built the custom static cockpit interface (`public/index.html`, `public/style.css`, `public/script.js`), designing the glassmorphic panels and responsive grids.
+   - Wired and configured **Chart.js** to display high-performance telemetry lines with custom interactive tooltips and shaded anomaly zone overlays.
+3. **Server & Pipeline Connection**:
+   - Created the Flask server layer (`server.py`) to serve static assets and expose the `/api/simulate` API endpoints, bridging browser trigger calls to the backend python pipeline.
+4. **Debugging & Optimization**:
+   - Debugged path variables to ensure clean imports, fixed terminal `UnicodeEncodeError` issues under Windows console environments, and re-architected file paths into a clean `public/` directory structure.
 
 ## Selected Challenge Theme
 
