@@ -20,17 +20,31 @@ python --version
 
 Running the Project Locally
 
+Clone or download this repository.
 
-Clone or download this repository
-
-Open a terminal and navigate to the src/ directory:
-cd src
-
-Run the demo pipeline:
-python main.py
-
-
+### Option A: Running the Terminal Console Version
+1. Open a terminal and navigate to the `src/` directory:
+   ```bash
+   cd src
+   ```
+2. Run the demo pipeline:
+   ```bash
+   python main.py
+   ```
 This runs the full pipeline end-to-end (telemetry simulation → SENTINEL → ORBITAL MEMORY → synthesis) and prints a risk card to the terminal, based on a scenario modeled on the real Mars Global Surveyor (2006) incident.
+
+### Option B: Running the Web UI Dashboard Cockpit
+1. Open a terminal in the root directory.
+2. Install dependencies:
+   ```bash
+   pip install -r requirements-ui.txt
+   ```
+3. Run the Flask server:
+   ```bash
+   python server.py
+   ```
+4. Open http://localhost:5000 in your browser.
+
 
 
 Working in IBM Bob
@@ -43,16 +57,22 @@ Choose Open Folder and select this project's root directory
 Open a terminal inside Bob and run the same command as above to confirm the pipeline runs correctly in that environment
 
 From there, IBM Bob's AI assistant can be used to extend the project, for example:
-Adding a web UI (e.g. Streamlit) on top of synthesis.py's output
-Adding additional curated historical events to data/historical_events.json
-Writing unit tests for the detection/forecasting logic
-Extending telemetry_simulator.py to support additional anomaly scenarios
+- Adding support for streaming telemetry via WebSockets to the Web UI dashboard.
+- Adding additional curated historical events to data/historical_events.json.
+- Writing unit tests for the detection/forecasting logic.
+- Extending telemetry_simulator.py to support additional anomaly scenarios.
 
 
 Project Structure
 
-├── README.md
-├── requirements.txt
+├── README.md                    — root description and quick start
+├── requirements.txt             — core pipeline dependencies
+├── requirements-ui.txt          — UI dashboard dependencies (Flask)
+├── server.py                    — Flask backend server serving UI and API
+├── public/                      — frontend Web UI dashboard static files
+│   ├── index.html               — main HTML structure
+│   ├── style.css                — dashboard styles
+│   └── script.js                — frontend telemetry visualization logic (Chart.js)
 ├── data/
 │   └── historical_events.json   — curated historical mission events (Orbital Memory's dataset)
 ├── src/
@@ -62,7 +82,7 @@ Project Structure
 │   ├── synthesis.py              — combines both into the risk card
 │   └── main.py                   — entry point for the end-to-end demo
 └── docs/
-    └── SETUP.md                  — this file
+    └── GETTING_STARTED.md        — this file
 
 Troubleshooting
 

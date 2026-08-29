@@ -87,7 +87,13 @@ IBM Bob was utilized as the primary AI engineering assistant to generate, refact
 ```
 sentinel_orbital_memory/
 ├── README.md                    <- this file
-├── requirements.txt
+├── requirements.txt             <- core pipeline dependencies (none required, uses standard library)
+├── requirements-ui.txt          <- UI dashboard dependencies (Flask)
+├── server.py                    <- Flask backend server serving UI and simulated data API
+├── public/                      <- frontend Web UI dashboard static files
+│   ├── index.html               <- main HTML structure
+│   ├── style.css                <- dashboard styles
+│   └── script.js                <- frontend telemetry visualization logic (Chart.js)
 ├── data/
 │   └── historical_events.json   <- curated Mission Memory (Orbital Memory's dataset)
 ├── src/
@@ -102,12 +108,27 @@ sentinel_orbital_memory/
 
 ## Running the Demo
 
+### Terminal Console Version
+To run the terminal pipeline demo end-to-end:
 ```bash
 cd src
 python main.py
 ```
+This runs the full pipeline end-to-end and prints a risk card to the terminal, modeled on the real Mars Global Surveyor (2006) incident.
 
-This runs the full pipeline end-to-end and prints a risk card to the terminal, modeled on the real Mars Global Surveyor (2006) incident. See `docs/GETTING_STARTED.md` for a step-by-step guide, including how to extend this with IBM Bob.
+### Web UI Dashboard Cockpit
+To run the interactive web interface dashboard:
+1. Install requirements:
+   ```bash
+   pip install -r requirements-ui.txt
+   ```
+2. Run the Flask server:
+   ```bash
+   python server.py
+   ```
+3. Open http://localhost:5000 in your web browser to view the real-time telemetry graphs, diagnostics engine, and historical correlation cards.
+
+See [GETTING_STARTED.md](file:///c:/Users/KETAN%20TIWARI/Downloads/IBM/Sentinel-orbital-memory-/docs/GETTING_STARTED.md) for a step-by-step guide, including how to extend this with IBM Bob.
 
 ## Data Sources
 
@@ -115,4 +136,8 @@ All historical events in `data/historical_events.json` are sourced from public N
 
 ## Status / Next Steps
 
-This is an MVP prototype covering one flagship scenario (power/thermal degradation) end-to-end. Natural next steps, time permitting: additional scenario types, a web UI, embeddings-based retrieval, and a trained forecasting model.
+This is an MVP prototype covering one flagship scenario (power/thermal degradation) end-to-end, complete with both a CLI output and a web UI dashboard cockpit. Natural next steps, time permitting:
+- Support for additional anomaly scenarios and telemetry streams.
+- Embeddings-based semantic search and vector retrieval for historical events.
+- Advanced machine learning trained forecasting models (e.g. LSTM, Prophet) instead of linear extrapolation.
+- Production deployment configuration and live WebSocket connections to streaming feeds.
