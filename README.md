@@ -64,19 +64,10 @@ LIVE TELEMETRY
 
 ## How IBM Bob Was Used
 
-IBM Bob was utilized as the primary AI engineering assistant to generate, refactor, and connect both the backend analysis engine and the visual dashboard interface:
-
-1. **Core Logic & Scaffolding (Backend)**:
-   - Generated the initial statistical anomaly detection algorithms, rolling baseline computations, and forecasting math models inside `src/sentinel.py`.
-   - Assisted in writing the keyword-overlap scoring and relevance formulas for historical database matching in `src/orbital_memory.py`.
-   - Structured the synthesis reporting logic in `src/synthesis.py` to compile metrics and precedents into a unified risk card format.
-2. **Visual Frontend Cockpit**:
-   - Built the custom static cockpit interface (`public/index.html`, `public/style.css`, `public/script.js`), designing the glassmorphic panels and responsive grids.
-   - Wired and configured **Chart.js** to display high-performance telemetry lines with custom interactive tooltips and shaded anomaly zone overlays.
-3. **Server & Pipeline Connection**:
-   - Created the Flask server layer (`server.py`) to serve static assets and expose the `/api/simulate` API endpoints, bridging browser trigger calls to the backend python pipeline.
-4. **Debugging & Optimization**:
-   - Debugged path variables to ensure clean imports, fixed terminal `UnicodeEncodeError` issues under Windows console environments, and re-architected file paths into a clean `public/` directory structure.
+IBM Bob was used in two confirmed ways during development.
+First, Bob was used to set up, run, and verify the project. The full codebase, including the backend pipeline and the web dashboard, was opened as a project folder inside Bob. The team used Bob's integrated terminal to run and test the application, confirming that the telemetry simulation, anomaly detection, historical evidence retrieval, and the live dashboard all worked correctly inside Bob's environment before anything was finalized.
+Second, Bob was used to build the error handling connection between the backend and the dashboard. The team prompted Bob to wrap the simulation logic in the Flask API route in a try and except block, catching the project's custom PipelineError exceptions and returning a structured JSON error response with an HTTP 400 status code, instead of letting the server crash. Bob was also prompted to update the frontend JavaScript so that when the API returns an error, the exact error message is parsed from the response and shown to the user in a clear popup, rather than a generic failure message. This was tested directly by triggering a simulated error and confirming the correct message appeared on screen.
+Bob served as the team's development and testing environment throughout the project, and specifically generated the error handling logic connecting the backend's validation system to the live dashboard.
 
 ## Selected Challenge Theme
 
