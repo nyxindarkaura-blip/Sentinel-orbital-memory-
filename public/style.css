@@ -674,3 +674,51 @@ h1, h2, h3, h4, h5, h6 {
 .fade-transition {
     animation: hud-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* Raw Telemetry Table and Toggle styling */
+.hud-btn-secondary {
+    background: rgba(30, 41, 59, 0.45);
+    color: var(--text-muted);
+    border: 1px solid var(--border-glass);
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hud-btn-secondary:hover {
+    color: var(--text-primary);
+    border-color: rgba(148, 163, 184, 0.4);
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.raw-telemetry-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+}
+
+.raw-telemetry-table th {
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--accent-cyan);
+    font-weight: 600;
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.raw-telemetry-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+.raw-telemetry-table tbody tr:hover {
+    background: rgba(148, 163, 184, 0.05);
+    color: var(--text-primary);
+}

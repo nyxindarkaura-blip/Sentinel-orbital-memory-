@@ -8,12 +8,27 @@
 
 // Active Chart.js instance tracking
 let telemetryChart = null;
+let confidenceMiniChart = null;
 let currentSimulationMode = 'anomaly';
+let confidenceHistory = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     // Bind button trigger clicks
     document.getElementById("btn-anomaly").addEventListener("click", () => triggerSimulation("anomaly"));
     document.getElementById("btn-nominal").addEventListener("click", () => triggerSimulation("nominal"));
+
+    // Bind raw telemetry table toggle click
+    document.getElementById("btn-toggle-raw").addEventListener("click", () => {
+        const container = document.getElementById("raw-telemetry-container");
+        const btn = document.getElementById("btn-toggle-raw");
+        if (container.style.display === "none") {
+            container.style.display = "block";
+            btn.textContent = "Hide Raw Data";
+        } else {
+            container.style.display = "none";
+            btn.textContent = "Show Raw Data";
+        }
+    });
 
     // Run initial simulation on load
     triggerSimulation("anomaly");
@@ -33,7 +48,16 @@ async function triggerSimulation(mode) {
 
         const response = await fetch(`/api/simulate?mode=${mode}`);
         if (!response.ok) {
-            throw new Error(`Server returned HTTP status ${response.status}`);
+            let errorMsg = `Server returned HTTP status ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMsg = errorData.error;
+                }
+            } catch (jsonErr) {
+                // Response was not JSON
+            }
+            throw new Error(errorMsg);
         }
         
         const data = await response.json();
@@ -173,6 +197,27 @@ function updateHUD(data) {
 
     // 7. Re-Plot the Telemetry Stream
     renderChart(readings);
+
+    // Track confidence history
+    confidenceHistory.push(diagnosis.confidence);
+    if (confidenceHistory.length > 15) {
+        confidenceHistory.shift();
+    }
+    renderConfidenceMiniChart();
+
+    // Populate raw telemetry table
+    const tableBody = document.getElementById("raw-telemetry-body");
+    tableBody.innerHTML = "";
+    readings.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${r.minute}</td>
+            <td>${r.battery_voltage.toFixed(2)}</td>
+            <td>${r.current.toFixed(2)}</td>
+            <td>${r.temperature.toFixed(2)}</td>
+        `;
+        tableBody.appendChild(tr);
+    });
 
     // 8. Fire update animations
     triggerTransition();
@@ -463,6 +508,79 @@ function renderChart(readings) {
                         text: 'Telemetry Sensor Readout',
                         color: '#64748b',
                         font: { family: "'Inter', sans-serif", size: 11, weight: 600 }
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Renders the small confidence over time history mini-chart.
+ */
+function renderConfidenceMiniChart() {
+    const ctx = document.getElementById("confidenceMiniChart").getContext("2d");
+    
+    if (confidenceMiniChart) {
+        confidenceMiniChart.destroy();
+    }
+    
+    const labels = confidenceHistory.map((_, index) => `#${index + 1}`);
+    
+    confidenceMiniChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Confidence',
+                data: confidenceHistory,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                borderWidth: 2,
+                pointRadius: 2.5,
+                pointBackgroundColor: '#10b981',
+                pointHoverRadius: 4,
+                tension: 0.2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: '#0c1020',
+                    borderColor: 'rgba(16, 185, 129, 0.25)',
+                    borderWidth: 1,
+                    titleFont: { family: "'JetBrains Mono', monospace", size: 10 },
+                    bodyFont: { family: "'JetBrains Mono', monospace", size: 10 }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: { family: "'JetBrains Mono', monospace", size: 8 }
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.03)',
+                        drawTicks: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: { family: "'JetBrains Mono', monospace", size: 8 },
+                        stepSize: 50
                     }
                 }
             }

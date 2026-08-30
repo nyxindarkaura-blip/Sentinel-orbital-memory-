@@ -51,6 +51,28 @@
                 <div class="chart-container">
                     <canvas id="telemetryChart"></canvas>
                 </div>
+                
+                <!-- Raw Telemetry Table Section -->
+                <div class="telemetry-table-section" style="margin-top: 20px; border-top: 1px solid var(--border-glass); padding-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Raw Telemetry Data</span>
+                        <button id="btn-toggle-raw" class="hud-btn-secondary">Show Raw Data</button>
+                    </div>
+                    <div id="raw-telemetry-container" style="display: none; margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                        <table class="raw-telemetry-table">
+                            <thead>
+                                <tr>
+                                    <th>Min</th>
+                                    <th>Voltage (V)</th>
+                                    <th>Current (A)</th>
+                                    <th>Temp (°C)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="raw-telemetry-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <!-- Sentinel Engine & Telemetry metrics -->
@@ -76,6 +98,14 @@
                             <div class="progress-bar-container">
                                 <div id="confidence-progress" class="progress-bar" style="width: 0%;"></div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confidence Over Time Mini-Chart -->
+                    <div class="mini-chart-section" style="margin-top: 20px; border-top: 1px solid var(--border-glass); padding-top: 15px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 8px;">Confidence History</span>
+                        <div style="height: 100px; position: relative;">
+                            <canvas id="confidenceMiniChart"></canvas>
                         </div>
                     </div>
                 </div>
